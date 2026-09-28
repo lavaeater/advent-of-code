@@ -18,7 +18,6 @@ pub enum Turn {
 
 fn main() {
     let mut lock = Lock::new(50, 99);
-    let mut zero_count = 0;
     let args = Args::parse();
     match fs::read_to_string(args.file) {
         Ok(text) => {
@@ -33,13 +32,11 @@ fn main() {
                     } else {
                         Turn::Right(ll)
                     };
-                    print!("{i}");
-                    if lock.turn(turn) {
-                        zero_count += 1;
-                    }
+                    print!("{i} ");
+                    lock.turn(turn);
                 }
             }
-            println!("The answer is {zero_count}");
+            println!("The answer is {}", lock.number_of_zeroes);
         }
         Err(err) => {
             println!("${err}");
@@ -48,17 +45,27 @@ fn main() {
 }
 
 pub struct Lock {
+    pub start_position: i32,
     pub current_position: i32,
     pub lock_max: i32,
+    pub number_of_zeroes: i32,
 }
 
 impl Lock {
     pub fn new(start: i32, max: i32) -> Self {
         Self {
+            start_position: start,
             current_position: start,
             lock_max: max,
+            number_of_zeroes: 0,
         }
     }
+    
+    pub fn reset(self: &mut Lock) {
+        self.current_position = self.start_position;
+        self.number_of_zeroes = 0;
+    }
+    
     pub fn rotate_right(self: &mut Lock) -> i32 {
         self.current_position += 1;
         if self.current_position > self.lock_max {
@@ -80,11 +87,10 @@ impl Lock {
         let mut ret = 0;
         for _i in 0..n {
             ret = self.rotate_right();
+            if ret == 0 {
+                self.number_of_zeroes +=1;
+            }
         }
-        println!(
-            "Rotating {n} steps to the right from {start} landed us at {ret} - cp: {}",
-            self.current_position
-        );
         ret
     }
 
@@ -93,18 +99,17 @@ impl Lock {
         let mut ret = 0;
         for _i in 0..n {
             ret = self.rotate_left();
+            if ret == 0 {
+                self.number_of_zeroes +=1;
+            }
         }
-        println!(
-            "Rotating {n} steps to the left from {start} landed us at {ret} - cp: {}",
-            self.current_position
-        );
         ret
     }
 
-    pub fn turn(self: &mut Lock, t: Turn) -> bool {
+    pub fn turn(self: &mut Lock, t: Turn)-> i32 {
         match t {
-            Left(ticks) => self.rotate_n_left(ticks) == 0,
-            Right(ticks) => self.rotate_n_right(ticks) == 0,
+            Left(ticks) => self.rotate_n_left(ticks),
+            Right(ticks) => self.rotate_n_right(ticks),
         }
     }
 }

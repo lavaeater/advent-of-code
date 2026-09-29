@@ -1,47 +1,8 @@
-use crate::Turn::{Left, Right};
-use clap::Parser;
-use std::fs;
-
-/// Simple program to greet a person
-#[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
-struct Args {
-    /// Name of the person to greet
-    #[arg(short, long)]
-    file: String,
-}
+use Turn::*;
 
 pub enum Turn {
     Left(i32),
     Right(i32),
-}
-
-fn main() {
-    let mut lock = Lock::new(50, 99);
-    let args = Args::parse();
-    match fs::read_to_string(args.file) {
-        Ok(text) => {
-            let lines = text.lines();
-            for (i,line) in lines.enumerate() {
-                if let Some(dir) = line.get(0..1)
-                    && let Some(l) = line.get(1..)
-                    && let Ok(ll) = l.parse::<i32>()
-                {
-                    let turn = if dir == "L" {
-                        Turn::Left(ll)
-                    } else {
-                        Turn::Right(ll)
-                    };
-                    print!("{i} ");
-                    lock.turn(turn);
-                }
-            }
-            println!("The answer is {}", lock.number_of_zeroes);
-        }
-        Err(err) => {
-            println!("${err}");
-        }
-    }
 }
 
 pub struct Lock {
@@ -83,7 +44,6 @@ impl Lock {
     }
 
     pub fn rotate_n_right(self: &mut Lock, n: i32) -> i32 {
-        let start = self.current_position;
         let mut ret = 0;
         for _i in 0..n {
             ret = self.rotate_right();
@@ -95,7 +55,6 @@ impl Lock {
     }
 
     pub fn rotate_n_left(self: &mut Lock, n: i32) -> i32 {
-        let start = self.current_position;
         let mut ret = 0;
         for _i in 0..n {
             ret = self.rotate_left();

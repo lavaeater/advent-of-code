@@ -1,4 +1,4 @@
-use clap::Parser;
+use clap::{ Parser, Subcommand, ValueEnum };
 use std::fs;
 
 mod lock;
@@ -7,22 +7,36 @@ mod products;
 use lock::*;
 use products::*;
 
+use core::str::Lines;
+
+#[derive(Debug, Clone, Parser, ValueEnum)]
+enum Action {
+    Lock,
+    InvalidIds
+}
+
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
-    /// Name of the person to greet
+    #[arg(short, long)]
+    action: Action,
     #[arg(short, long)]
     file: String,
 }
 
-fn main() {
-    let mut lock = Lock::new(50, 99);
-    let args = Args::parse();
-    match fs::read_to_string(args.file) {
-        Ok(text) => {
-            let lines = text.lines();
-            for (i,line) in lines.enumerate() {
+fn file_to_strings(path: &String)-> Result<Vec<String>, String> {
+    match fs::read_to_string(path) {
+        Ok(s) => Ok(s.lines().map(|s|s.to_owned()).collect()),
+        Err(e) => Err(format!("Could not parse input file: {}", e))
+    }
+}
+
+fn unlock(path: String) {
+    match file_to_strings(&path) {
+        Ok(lines) => {
+            let mut lock = Lock::new(50, 99);
+            for (i,line) in lines.iter().enumerate() {
                 if let Some(dir) = line.get(0..1)
                     && let Some(l) = line.get(1..)
                     && let Ok(ll) = l.parse::<i32>()
@@ -40,7 +54,20 @@ fn main() {
         }
         Err(err) => {
             println!("${err}");
-        }
+        }    
+}
+
+fn invalid_ids(path: String) {
+    
+}
+
+fn main() {
+    let args = Args::parse();
+    match args.action {
+        Action::Lock => unlock(args.file),
+        Action::InvalidIds => invalid_ids(args.file)
+    }
+
     }
 }
 

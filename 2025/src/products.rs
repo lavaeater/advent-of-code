@@ -63,12 +63,17 @@ pub fn is_invalid_old(product_id: &str) -> bool {
     }
 }
 
-fn generate_range(input: &str)->Vec<String> {
+fn generate_range(input: &str)-> Result<Vec<String>, &str> {
     //Range is in format nnnn-mmmm
     let ranges = input.split("-").collect::<Vec<&str>>();
-    let Some(range_start) = ranges.first() else {panic!("Should have a first!")};
-    let Some(range_end) = ranges.first() else {panic!("Should have a first!")};
+    let Some(range_start) = ranges.first() else { return Err("Should have a first!"); };
+    let Some(range_end) = ranges.last() else { return Err("Should have a last!"); };
     
+    if let Ok(start) = range_start.parse::<i32>() && let Ok(end) = range_end.parse::<i32>() {
+        Ok((start..=end).map(|i|i.to_string()).collect())
+    } else {
+        Err("Could not parse to i32")
+    }
 }
 
 #[cfg(test)]

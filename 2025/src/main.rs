@@ -1,5 +1,5 @@
 use clap::{ Parser, Subcommand, ValueEnum };
-use std::fs;
+use std::{fs, io};
 
 mod lock;
 mod products;
@@ -54,11 +54,32 @@ fn unlock(path: String) {
         }
         Err(err) => {
             println!("${err}");
-        }    
+        }
+    }    
 }
 
 fn invalid_ids(path: String) {
-    
+    match fs::read_to_string(&path) {
+        Ok(s) => {
+            let sum: i64 = s
+            .split(",")
+            .map(|r|generate_range(r))
+            .flatten()
+            .filter(|s|is_invalid(s))
+            .map(|s|s.parse::<i64>().map_or_default(|i| i))
+            .sum();
+/*            
+            let sum: i64 = s.split(",")
+            .map(|r| generate_range(r))
+            .flatten()
+            .filter(|s|is_invalid(s))
+            .map(|s|s.parse::<i64>().map_or_default(|i|i))
+            .sum();
+            */
+            println!("The sum of all invalid ids is: {sum}!");
+        },
+        Err(e) => {println!("Something went wrong: {}", e);}
+    }    
 }
 
 fn main() {
@@ -67,8 +88,7 @@ fn main() {
         Action::Lock => unlock(args.file),
         Action::InvalidIds => invalid_ids(args.file)
     }
-
-    }
 }
+
 
 

@@ -36,43 +36,26 @@ pub fn is_invalid(product_id: &str) -> bool {
     }
 }
 
-pub fn is_invalid_old(product_id: &str) -> bool {
-    let l = product_id.len();
-    println!("Is {product_id} repeating? Let's see!");
-
-    if l % 2 != 0 {
-        false
-    } else {
-        let max_sublength = l / 2;
-        for sl in 1..=max_sublength {
-            let number_of_parts = l / sl; //str of l 2 has 2 1 char parts
-            if let Some(first_part) = product_id.get(0..sl) {
-                let mut is_invalid = true;
-                for pi in 1..number_of_parts {
-                    if let Some(next_part) = product_id.get(pi * sl..pi * sl + sl) {
-                        println!("Comparing {first_part} with {next_part}");
-                        is_invalid = is_invalid && first_part.eq(next_part);
-                    }
-                }
-                if is_invalid {
-                    return is_invalid;
-                }
-            }
-        }
-        false
-    }
+pub fn invalid_ids_from_range(range: &str) -> Vec<i64> {
+    generate_range(range)
+    .iter()
+    .filter(|s| is_invalid(s))
+    .map(|s|s.parse::<i64>().map_or_default(|i|i))
+    .collect()
 }
 
-fn generate_range(input: &str)-> Result<Vec<String>, &str> {
+pub fn generate_range(input: &str)-> Vec<String> {
     //Range is in format nnnn-mmmm
     let ranges = input.split("-").collect::<Vec<&str>>();
-    let Some(range_start) = ranges.first() else { return Err("Should have a first!"); };
-    let Some(range_end) = ranges.last() else { return Err("Should have a last!"); };
+    let Some(range_start) = ranges.first() else { return Vec::new(); };
+    let Some(range_end) = ranges.last() else { return Vec::new(); };
     
-    if let Ok(start) = range_start.parse::<i32>() && let Ok(end) = range_end.parse::<i32>() {
-        Ok((start..=end).map(|i|i.to_string()).collect())
+    println!("Input {input}");
+    
+    if let Ok(start) = range_start.parse::<i64>() && let Ok(end) = range_end.parse::<i64>() {
+        (start..=end).map(|i|i.to_string()).collect()
     } else {
-        Err("Could not parse to i32")
+        Vec::new()
     }
 }
 
@@ -81,8 +64,18 @@ mod tests {
     use super::*;
     use test_case::test_case;
 
+    #[test_case("11-22", &[11i64,22i64])]
+    #[test_case("95-115", &[99i64])]
+    #[test_case("1188511880-1188511890", &[1188511885i64])]
+    #[test_case("222220-222224", &[222222i64])]
+    #[test_case("1698522-1698528", &[])]
+    fn correct_results(range: &str, expected: &[i64]) {
+        let actual = invalid_ids_from_range(range);
+        assert_eq!(actual, expected);
+    }
+    
     #[test_case("22")]
-    #[test_case("2222")]
+    #[test_case("11")]
     #[test_case("2121")]
     #[test_case("211211")]
     #[test_case("202020")]

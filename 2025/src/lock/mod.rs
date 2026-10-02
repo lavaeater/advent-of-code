@@ -21,12 +21,12 @@ impl Lock {
             number_of_zeroes: 0,
         }
     }
-    
+
     pub fn reset(self: &mut Lock) {
         self.current_position = self.start_position;
         self.number_of_zeroes = 0;
     }
-    
+
     pub fn rotate_right(self: &mut Lock) -> i32 {
         self.current_position += 1;
         if self.current_position > self.lock_max {
@@ -48,7 +48,7 @@ impl Lock {
         for _i in 0..n {
             ret = self.rotate_right();
             if ret == 0 {
-                self.number_of_zeroes +=1;
+                self.number_of_zeroes += 1;
             }
         }
         ret
@@ -59,13 +59,13 @@ impl Lock {
         for _i in 0..n {
             ret = self.rotate_left();
             if ret == 0 {
-                self.number_of_zeroes +=1;
+                self.number_of_zeroes += 1;
             }
         }
         ret
     }
 
-    pub fn turn(self: &mut Lock, t: Turn)-> i32 {
+    pub fn turn(self: &mut Lock, t: Turn) -> i32 {
         match t {
             Left(ticks) => self.rotate_n_left(ticks),
             Right(ticks) => self.rotate_n_right(ticks),

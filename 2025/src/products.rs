@@ -4,44 +4,50 @@ pub fn is_invalid(product_id: &str) -> bool {
     if l <= 1 {
         return false;
     }
-    
-    let max_window  = l / 2;
+
+    let max_window = l / 2;
     for window_size in (1..=max_window) {
-    let repeating = chars
-                .chunks(window_size)
-                .fold((true, None), |acc, elem| {
-                    if let Some(prev) = acc.1 {
-                        (acc.0 && (prev == elem), Some(elem))
-                    } else {
-                        (true, Some(elem))
-                    }
-                })
-                .0;
-                if repeating {
-                    return true;
+        let repeating = chars
+            .chunks(window_size)
+            .fold((true, None), |acc, elem| {
+                if let Some(prev) = acc.1 {
+                    (acc.0 && (prev == elem), Some(elem))
+                } else {
+                    (true, Some(elem))
                 }
+            })
+            .0;
+        if repeating {
+            return true;
+        }
     }
-            false
+    false
 }
 
 pub fn invalid_ids_from_range(range: &str) -> Vec<i64> {
     generate_range(range)
-    .iter()
-    .filter(|s| is_invalid(s))
-    .map(|s|s.parse::<i64>().map_or_default(|i|i))
-    .collect()
+        .iter()
+        .filter(|s| is_invalid(s))
+        .map(|s| s.parse::<i64>().map_or_default(|i| i))
+        .collect()
 }
 
-pub fn generate_range(input: &str)-> Vec<String> {
+pub fn generate_range(input: &str) -> Vec<String> {
     //Range is in format nnnn-mmmm
     let ranges = input.split("-").collect::<Vec<&str>>();
-    let Some(range_start) = ranges.first() else { return Vec::new(); };
-    let Some(range_end) = ranges.last() else { return Vec::new(); };
-    
+    let Some(range_start) = ranges.first() else {
+        return Vec::new();
+    };
+    let Some(range_end) = ranges.last() else {
+        return Vec::new();
+    };
+
     println!("Input {input}");
-    
-    if let Ok(start) = range_start.parse::<i64>() && let Ok(end) = range_end.parse::<i64>() {
-        (start..=end).map(|i|i.to_string()).collect()
+
+    if let Ok(start) = range_start.parse::<i64>()
+        && let Ok(end) = range_end.parse::<i64>()
+    {
+        (start..=end).map(|i| i.to_string()).collect()
     } else {
         Vec::new()
     }
@@ -51,7 +57,7 @@ pub fn generate_range(input: &str)-> Vec<String> {
 mod tests {
     use super::*;
     use test_case::test_case;
-    
+
     #[test_case("11-22", &[11, 22])]
     #[test_case("95-115", &[99, 111])]
     #[test_case("998-1012", &[999, 1010])]
@@ -67,7 +73,7 @@ mod tests {
         let actual = invalid_ids_from_range(range);
         assert_eq!(actual, expected);
     }
-    
+
     #[test_case("22")]
     #[test_case("11")]
     #[test_case("2121")]
